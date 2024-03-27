@@ -17,20 +17,38 @@ describe("Appointment", () => {
     );
 
   it("renders the customer first name", () => {
-    const customer = { firstName: "Ashley" };
-    render(<Appointment customer={customer} />);
-    expect(document.body.textContent).toContain(
-      "Ashley"
-    );
+    const customer = {firstName: "Ashley"}
+
+    render(<Appointment customer={customer}/>)
+    expect(document.body.textContent).toContain("Ashley");
   });
 
-  it("renders another customer first name", () => {
-    const customer = { firstName: "Jordan" };
+  // it.skip("renders the customer first name", () => {
+  //   let customer = {firstName: "Jordan"}
+  //   const component = <Appointment customer={customer}/>
+  //   const container = document.createElement("div");
+  //   document.body.appendChild(container);
 
-    render(<Appointment customer={customer} />);
+  //   act(() => {
+  //     ReactDOM.createRoot(container).render(component);
+  //   })
+  //   expect(document.body.textContent).toContain("Jordan");
+  // });
 
-    expect(document.body.textContent).toContain(
-      "Jordan"
-    );
+  // it("renders the customer first name", () => {
+  //   let customer = {firstName: "Jordan"}
+  //   const component = <Appointment customer={customer}/>
+
+  //   act(() => {
+  //     ReactDOM.createRoot(container).render(component);
+  //   })
+  //   expect(document.body.textContent).toContain("Jordan");
+  // });
+
+  it("renders the customer first name", () => {
+    const customer = {firstName: "Jordan"}
+
+    render(<Appointment customer={customer}/>)
+    expect(document.body.textContent).toContain("Jordan");
   });
 });

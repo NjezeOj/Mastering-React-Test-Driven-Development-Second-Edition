@@ -57,37 +57,54 @@ export const AppointmentsDayView = ({
   ] = useState(0);
 
   return (
+    // <div id="appointmentsDayView">
+    //   <ol>
+    //     {appointments.map((appointment, i) => (
+    //       <li key={appointment.startsAt}>
+    //         <button
+    //           className={
+    //             i === selectedAppointment
+    //               ? "toggled"
+    //               : ""
+    //           }
+    //           type="button"
+    //           onClick={() =>
+    //             setSelectedAppointment(i)
+    //           }
+    //         >
+    //           {appointmentTimeOfDay(
+    //             appointment.startsAt
+    //           )}
+    //         </button>
+    //       </li>
+    //     ))}
+    //   </ol>
+    //   {appointments.length === 0 ? (
+    //     <p>
+    //       There are no appointments scheduled for
+    //       today.
+    //     </p>
+    //   ) : (
+    //     <Appointment
+    //       {...appointments[selectedAppointment]}
+    //     />
+    //   )}
+    // </div>
     <div id="appointmentsDayView">
       <ol>
-        {appointments.map((appointment, i) => (
+        {appointments.map((appointment) => (
           <li key={appointment.startsAt}>
-            <button
-              className={
-                i === selectedAppointment
-                  ? "toggled"
-                  : ""
-              }
-              type="button"
-              onClick={() =>
-                setSelectedAppointment(i)
-              }
-            >
-              {appointmentTimeOfDay(
-                appointment.startsAt
-              )}
+            <button type="button">
+              {appointmentTimeOfDay(appointment.startsAt)}
             </button>
           </li>
         ))}
       </ol>
+
       {appointments.length === 0 ? (
-        <p>
-          There are no appointments scheduled for
-          today.
-        </p>
-      ) : (
-        <Appointment
-          {...appointments[selectedAppointment]}
-        />
+       <p>There are no appointments scheduled for today.</p>
+      ):(
+      <Appointment {...appointments[0]} />
       )}
     </div>
   );
