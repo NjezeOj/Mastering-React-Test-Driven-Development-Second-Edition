@@ -5,11 +5,21 @@ import {
     field,
     form,
     element,
-    elements
+    elements,
+    submitButton,
+    click,
 } from "./reactTestExtensions";
 import { AppointmentForm } from "../src/AppointmentForm";
 
 describe("AppointmentForm", () => {
+    const today = new Date();
+    const availableTimeSlots = [
+       { startsAt: today.setHours(9, 0, 0, 0) },
+       { startsAt: today.setHours(9, 30, 0, 0) },
+    ];
+    const startsAtField = (index) =>
+     elements("input[name=startsAt]")[index];
+
     const labelsOfAllOptions = (element) =>
     Array.from(
       element.childNodes,
@@ -34,27 +44,39 @@ describe("AppointmentForm", () => {
     });
     
     it("renders a form", () => {
-        render(<AppointmentForm original={blankAppointment} />);
+        render(<AppointmentForm 
+            original={blankAppointment} 
+            availableTimeSlots={availableTimeSlots}/>);
         expect(form()).not.toBeNull();
     }); 
 
+    it("renders a submit button", () => {
+        render(
+          <AppointmentForm original={blankAppointment} />
+        );
+        expect(submitButton()).not.toBeNull();
+      });
+
     describe("service field", () => {
         it("renders as a select box", () => {
-            render(<AppointmentForm original={blankAppointment} />);
+            render(<AppointmentForm original={blankAppointment} 
+                availableTimeSlots={availableTimeSlots}/>);
             expect(field("service")).not.toBeNull();
             expect(field("service").tagName).toEqual("SELECT");
         });
     });
 
     it("has a blank value as the first value", () => {
-        render(<AppointmentForm original={blankAppointment} />);
+        render(<AppointmentForm original={blankAppointment} 
+            availableTimeSlots={availableTimeSlots}/>);
         const firstOption = field("service").childNodes[0];
         expect(firstOption.value).toEqual("");
     });
 
     it("lists all salon services", () => {
             render(
-            <AppointmentForm selectableServices={services} original={blankAppointment}/>
+            <AppointmentForm selectableServices={services} original={blankAppointment}
+            availableTimeSlots={availableTimeSlots}/>
         );
 
         expect(labelsOfAllOptions(field("service")))
@@ -67,6 +89,7 @@ describe("AppointmentForm", () => {
             <AppointmentForm
                 selecta6bleServices={services}
                 original={appointment}
+                availableTimeSlots={availableTimeSlots}
             /> );
         const option = findOption(
           field("service"),
@@ -75,10 +98,29 @@ describe("AppointmentForm", () => {
         expect(option.selected).toBe(true);
    });
 
+   it("saves existing value when submitted", () => {
+    expect.hasAssertions();
+    const appointment = {
+      startsAt: availableTimeSlots[1].startsAt,
+    };
+    render(
+      <AppointmentForm
+        original={appointment}
+        availableTimeSlots={availableTimeSlots}
+        today={today}
+        onSubmit={({ startsAt }) =>
+                expect(startsAt).toEqual(
+                    availableTimeSlots[1].startsAt
+                )
+        } />
+        );
+        click(submitButton());
+    });
    describe("time slot table", () => {
         it("renders a table for time slots with an id", () => {
             render(
-                <AppointmentForm original={blankAppointment} />
+                <AppointmentForm original={blankAppointment} 
+                availableTimeSlots={availableTimeSlots}/>
             ); 
             
             expect(element("table#time-slots")).not.toBeNull();
@@ -90,6 +132,7 @@ describe("AppointmentForm", () => {
                     original={blankAppointment}
                     salonOpensAt={9}
                     salonClosesAt={11}
+                    availableTimeSlots={availableTimeSlots}
                     />
             );
             const timesOfDayHeadings = elements("tbody >* th");
@@ -104,7 +147,8 @@ describe("AppointmentForm", () => {
 
         it("renders an empty cell at the start of the header row", () => {
             render(
-            <AppointmentForm original={blankAppointment} />);
+            <AppointmentForm original={blankAppointment} 
+            availableTimeSlots={availableTimeSlots}/>);
             const headerRow = element("thead > tr");
             expect(headerRow.firstChild).toContainText("");
         });
@@ -115,6 +159,7 @@ describe("AppointmentForm", () => {
             <AppointmentForm
                 original={blankAppointment}
                 today={specificDate}
+                availableTimeSlots={availableTimeSlots}
             /> );
             const dates = elements(
                 "thead >* th:not(:first-child)"
@@ -159,8 +204,39 @@ describe("AppointmentForm", () => {
                     original={blankAppointment}
                     availableTimeSlots={[]}
                 />
-            ); expect(
+            ); 
+            
+            expect(
                 elements("input[type=radio]")
                 ).toHaveLength(0);
+            });
+
+        it("sets radio button values to the startsAt value of the corresponding appointment", () => {
+            render(
+            <AppointmentForm
+                original={blankAppointment}
+                availableTimeSlots={availableTimeSlots}
+                today={today}
+            /> );
+            const allRadioValues = elements(
+            "input[type=radio]"
+            ).map(({ value }) => parseInt(value));
+            const allSlotTimes = availableTimeSlots.map(
+            ({ startsAt }) => startsAt
+            );
+            expect(allRadioValues).toEqual(allSlotTimes);
+        });
+    
+        it("pre-selects the existing value", () => {
+            const appointment = {
+                startsAt: availableTimeSlots[1].startsAt,
+            };
+            render(
+                <AppointmentForm
+                original={appointment}
+                availableTimeSlots={availableTimeSlots}
+                today={today}
+        /> );
+            expect(startsAtField(1).checked).toEqual(true);
             });
 });
