@@ -20,6 +20,26 @@ describe("CustomerForm", () => {
     phoneNumber: "",
   };
 
+  // const singleArgumentSpy = () => {
+  //   let receivedArgument;
+  //   return {
+  //     fn: arg => (receivedArgument = arg),
+  //     receivedArgument: () => receivedArgument
+  //   };
+  // };
+
+  // Make your spy function work for functions with any number of arguments
+  // by replacing singleArgumentSpy with the following function: 
+  const spy = () => {
+    let receivedArguments;
+    return {
+      fn: (...args) => (receivedArguments = args),
+      receivedArguments: () => receivedArguments,
+      receivedArgument: n => receivedArguments[n]
+    };
+  };
+    
+
   beforeEach(() => {
     initializeReactContainer();
   });
@@ -44,6 +64,7 @@ describe("CustomerForm", () => {
       );
     });
 
+  // the function below is a test-generator fucntion
   const itIncludesTheExistingValue = (
     fieldName,
     existing
@@ -82,19 +103,41 @@ describe("CustomerForm", () => {
       expect(field(fieldName).id).toEqual(fieldName);
     });
 
+  // const itSubmitsExistingValue = (fieldName, value) =>
+  //   it("saves existing value when submitted", () => {
+  //     expect.hasAssertions();
+  //     const customer = { [fieldName]: value };
+  //     render(
+  //       <CustomerForm
+  //         original={customer}
+  //         onSubmit={(props) =>
+  //           expect(props[fieldName]).toEqual(value)
+  //         }
+  //       />
+  //     );
+  //     click(submitButton());
+  //   });
+  
   const itSubmitsExistingValue = (fieldName, value) =>
     it("saves existing value when submitted", () => {
-      expect.hasAssertions();
+      // let submitArg;
+      const submitSpy = spy();
       const customer = { [fieldName]: value };
       render(
         <CustomerForm
           original={customer}
-          onSubmit={(props) =>
-            expect(props[fieldName]).toEqual(value)
-          }
+          // onSubmit={submittedCustomer =>
+          //   (submitArg = submittedCustomer)
+          // }
+          onSubmit={submitSpy.fn}
         />
       );
       click(submitButton());
+      expect(
+        submitSpy.receivedArguments()
+        ).toBeDefined();
+      // expect(submitSpy.receivedArgument()).toEqual(customer);
+      expect(submitSpy.receivedArgument(0)).toEqual(customer);
     });
 
   const itSubmitsNewValue = (fieldName, value) =>
