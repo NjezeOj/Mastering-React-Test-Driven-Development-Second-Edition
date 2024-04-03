@@ -14,6 +14,11 @@ export const CustomerForm = ({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    global.fetch("/customers", {
+      method: "POST",
+    });
+
     onSubmit(customer);
   };
 

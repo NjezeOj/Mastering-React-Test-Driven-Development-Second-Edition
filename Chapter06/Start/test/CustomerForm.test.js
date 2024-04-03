@@ -38,10 +38,20 @@ describe("CustomerForm", () => {
       receivedArgument: n => receivedArguments[n]
     };
   };
-    
+  
+  const originalFetch = global.fetch;
+  let fetchSpy;
+
 
   beforeEach(() => {
     initializeReactContainer();
+
+    fetchSpy = spy();
+    global.fetch = fetchSpy.fn;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   it("renders a form", () => {
@@ -52,6 +62,42 @@ describe("CustomerForm", () => {
   it("renders a submit button", () => {
     render(<CustomerForm original={blankCustomer} />);
     expect(submitButton()).not.toBeNull();
+  });
+
+  it("sends request to POST /customers when submitting the form",
+  () => {
+    render(
+      <CustomerForm
+      original={blankCustomer}
+      onSubmit={() => {}}
+      />
+    );
+    click(submitButton());
+    expect(fetchSpy).toBeCalledWith(
+      "/customers",
+      expect.objectContaining({
+      method: "POST",
+      })
+    );
+  });
+
+  it("calls fetch with the right configuration", () => {
+    render(
+      <CustomerForm
+      original={blankCustomer}
+      onSubmit={() => {}}
+      />
+    );
+    click(submitButton());
+    expect(fetchSpy).toBeCalledWith(
+    expect.anything(),
+    expect.objectContaining({
+      credentials: "same-origin",
+      headers: {
+      "Content-Type": "application/json",
+      },
+    })
+    );
   });
 
   const itRendersAsATextBox = (fieldName) =>
@@ -133,9 +179,11 @@ describe("CustomerForm", () => {
         />
       );
       click(submitButton());
-      expect(
-        submitSpy.receivedArguments()
-        ).toBeDefined();
+      // expect(
+      //   submitSpy.receivedArguments()
+      //   ).toBeDefined();
+      //expect(submitSpy).toBeCalled(customer);
+      expect(submitSpy).toBeCalledWith(customer);
       // expect(submitSpy.receivedArgument()).toEqual(customer);
       expect(submitSpy.receivedArgument(0)).toEqual(customer);
     });
