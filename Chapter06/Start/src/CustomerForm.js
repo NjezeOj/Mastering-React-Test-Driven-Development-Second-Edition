@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 export const CustomerForm = ({
   original,
-  onSubmit,
+  //onSubmit,
 }) => {
   const [customer, setCustomer] = useState(original);
 
@@ -17,9 +17,12 @@ export const CustomerForm = ({
 
     global.fetch("/customers", {
       method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(customer),
     });
 
-    onSubmit(customer);
+    //onSubmit(customer);
   };
 
   return (

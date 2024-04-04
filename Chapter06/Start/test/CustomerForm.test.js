@@ -32,16 +32,24 @@ describe("CustomerForm", () => {
   // by replacing singleArgumentSpy with the following function: 
   const spy = () => {
     let receivedArguments;
+    let returnValue
     return {
-      fn: (...args) => (receivedArguments = args),
+      // fn: (...args) => (receivedArguments = args),
+      fn: (...args) => {
+        receivedArguments = args;
+        return returnValue // adding makes this spy a stub
+      },
       receivedArguments: () => receivedArguments,
-      receivedArgument: n => receivedArguments[n]
+      receivedArgument: n => receivedArguments[n],
+      stubReturnValue: value => returnValue = value // adding makes this spy a stub
     };
   };
   
   const originalFetch = global.fetch;
   let fetchSpy;
 
+  const bodyOfLastFetchRequest = () =>
+    JSON.parse(fetchSpy.receivedArgument(1).body);
 
   beforeEach(() => {
     initializeReactContainer();
@@ -164,44 +172,102 @@ describe("CustomerForm", () => {
   //     click(submitButton());
   //   });
   
-  const itSubmitsExistingValue = (fieldName, value) =>
-    it("saves existing value when submitted", () => {
-      // let submitArg;
-      const submitSpy = spy();
-      const customer = { [fieldName]: value };
-      render(
-        <CustomerForm
-          original={customer}
-          // onSubmit={submittedCustomer =>
-          //   (submitArg = submittedCustomer)
-          // }
-          onSubmit={submitSpy.fn}
-        />
-      );
-      click(submitButton());
-      // expect(
-      //   submitSpy.receivedArguments()
-      //   ).toBeDefined();
-      //expect(submitSpy).toBeCalled(customer);
-      expect(submitSpy).toBeCalledWith(customer);
-      // expect(submitSpy.receivedArgument()).toEqual(customer);
-      expect(submitSpy.receivedArgument(0)).toEqual(customer);
-    });
+//   Your call to fetch is now complete, so you can remove the original
+// implementation. Start by removing the onSubmit prop and the submitSpy
+// variable from the itSubmitsExistingValue test generator
 
+  // const itSubmitsExistingValue = (fieldName, value) =>
+  //   it("saves existing value when submitted", () => {
+  //     // let submitArg;
+  //     const submitSpy = spy();
+  //     const customer = { [fieldName]: value };
+  //     render(
+  //       <CustomerForm
+  //         original={customer}
+  //         // onSubmit={submittedCustomer =>
+  //         //   (submitArg = submittedCustomer)
+  //         // }
+  //         onSubmit={submitSpy.fn}
+  //       />
+  //     );
+  //     click(submitButton());
+  //     // expect(
+  //     //   submitSpy.receivedArguments()
+  //     //   ).toBeDefined();
+  //     //expect(submitSpy).toBeCalled(customer);
+  //     expect(submitSpy).toBeCalledWith(customer);
+  //     // expect(submitSpy.receivedArgument()).toEqual(customer);
+  //     expect(submitSpy.receivedArgument(0)).toEqual(customer);
+
+  //     expect(fetchSpy).toBeCalledWith(
+  //       expect.anything(),
+  //       expect.objectContaining({
+  //       body: JSON.stringify(customer),
+  //       })
+  //     );
+        
+  //   });
+
+  const itSubmitsExistingValue = (fieldName, value) =>
+  it("saves existing value when submitted", () => {
+    const customer = { [fieldName]: value };
+    render(<CustomerForm original={customer} />);
+    click(submitButton());
+    // expect(fetchSpy).toBeCalledWith(
+    //   expect.anything(),
+    //   expect.objectContaining({
+    //     body: JSON.stringify(customer),
+    //   })
+    // );
+    expect(bodyOfLastFetchRequest()).toMatchObject(
+      customer
+     );
+  });
+
+
+  // const itSubmitsNewValue = (fieldName, value) =>
+  //   it("saves new value when submitted", () => {
+  //     expect.hasAssertions();
+  //     render(
+  //       <CustomerForm
+  //         original={blankCustomer}
+  //         onSubmit={(props) =>
+  //           expect(props[fieldName]).toEqual(value)
+  //         }
+  //       />
+  //     );
+  //     change(field(fieldName), value);
+  //     click(submitButton());
+
+  //     expect(fetchSpy).toBeCalledWith(
+  //       expect.anything(),
+  //       expect.objectContaining({
+  //         body: JSON.stringify({
+  //           ...blankCustomer,
+  //           [fieldName]: value,
+  //         }),
+  //       })
+  //     );
+  //   });
   const itSubmitsNewValue = (fieldName, value) =>
     it("saves new value when submitted", () => {
-      expect.hasAssertions();
-      render(
-        <CustomerForm
-          original={blankCustomer}
-          onSubmit={(props) =>
-            expect(props[fieldName]).toEqual(value)
-          }
-        />
-      );
-      change(field(fieldName), value);
-      click(submitButton());
-    });
+    render(<CustomerForm original={blankCustomer} />);
+    change(field(fieldName), value);
+    click(submitButton());
+    // expect(fetchSpy).toBeCalledWith(
+    //   expect.anything(),
+    //   expect.objectContaining({
+    //       body: JSON.stringify({
+    //       ...blankCustomer,
+    //       [fieldName]: value,
+    //     }),
+    //   })
+    // );
+    expect(bodyOfLastFetchRequest()).toMatchObject({
+      [fieldName]: value,
+      });
+      
+  });
 
   describe("first name field", () => {
     itRendersAsATextBox("firstName");
@@ -249,7 +315,9 @@ describe("CustomerForm", () => {
     render(
       <CustomerForm
         original={blankCustomer}
-        onSubmit={() => {}}
+
+        // removed after spies impl
+        //onSubmit={() => {}}
       />
     );
 
