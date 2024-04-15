@@ -2,7 +2,6 @@ import React from "react";
 import {
   initializeReactContainer,
   render,
-  element,
   form,
   field,
   click,
